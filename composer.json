@@ -50,6 +50,10 @@
     },
     "repositories": [
         {
+            "type": "composer",
+            "url": "https://larapack.io"
+        },
+        {
             "type": "vcs",
             "url": "https://github.com/kortic/voyager-frontend"
         }
