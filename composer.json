@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "pvtl/voyager-frontend": "^0.9"
+        "pvtl/voyager-frontend": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7"
@@ -52,10 +52,6 @@
         {
             "type": "vcs",
             "url": "https://github.com/kortic/voyager-frontend"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/kortic/voyager-pages"
         }
     ]
 }
