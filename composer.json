@@ -47,5 +47,11 @@
         "post-package-install": [
             "@php artisan voyager-page-blocks:install"
         ]
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/kortic/voyager-frontend"
+        }
+    ]
 }
