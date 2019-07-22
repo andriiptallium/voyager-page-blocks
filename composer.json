@@ -52,6 +52,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/kortic/voyager-frontend"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/kortic/voyager-pages"
         }
     ]
 }
