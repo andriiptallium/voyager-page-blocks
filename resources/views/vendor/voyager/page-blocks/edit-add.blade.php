@@ -57,6 +57,10 @@
     </style>
 @stop
 
+@php
+    $isModelTranslatable = is_bread_translatable($page)
+@endphp
+
 @section('page_title', 'Edit Page Content')
 
 @section('page_header')
@@ -81,7 +85,7 @@
 
                     <div class="panel-body">
                         <form role="form" action="{{ route('voyager.page-blocks.store', $page->id) }}" method="POST"
-                            enctype="multipart/form-data">
+                              enctype="multipart/form-data">
                             {{ csrf_field() }}
 
                             <div class="form-group">
@@ -215,7 +219,7 @@
             /**
              * ORDER blocks
              */
-             // Init drag 'n drop
+            // Init drag 'n drop
             $('.dd').nestable({ handleClass: 'order-handle', maxDepth: 1 });
 
             // Close all panels when dragging
@@ -238,6 +242,10 @@
                     });
                 }
             });
+
+            @if ($isModelTranslatable)
+                $('.side-body').multilingual({"editing": true});
+            @endif
         });
     </script>
 @endsection

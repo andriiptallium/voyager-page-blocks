@@ -6,9 +6,9 @@
 
             <h3 class="panel-title">
                 <a
-                        class="panel-action panel-collapse-icon voyager-angle-up"
-                        data-toggle="block-collapse"
-                        style="cursor:pointer"
+                    class="panel-action panel-collapse-icon voyager-angle-up"
+                    data-toggle="block-collapse"
+                    style="cursor:pointer"
                 >
                     {{ $template->name }}
                     @if (!empty($template->description)) <span class="panel-desc"> {{ $template->description }}</span>@endif
@@ -20,7 +20,7 @@
         </div>
 
         <div class="panel-body" @if ($block->is_minimized == 1) style="display:none" @endif>
-            <form role="form" action="{{ route('voyager.page-blocks.update', $block->id) }}" method="POST"
+            <form role="form" class="form-edit-add" action="{{ route('voyager.page-blocks.update', $block->id) }}" method="POST"
                   enctype="multipart/form-data">
                 {{ method_field("PUT") }}
                 {{ csrf_field() }}
@@ -31,9 +31,15 @@
 
                     @php $options = $row; @endphp
 
+                    @php
+                        $dataTypeContent = $block;
+                        $dataTypeContent->setTranslatableFields(array_keys(get_object_vars($template->fields)));
+                    @endphp
+
                     <div class="@if (strpos($row->partial, 'rich_text_box') !== false)col-md-12 @else col-md-6 @endif">
                         <div class="form-group">
                             <label>{{ $row->display_name }}</label>
+                            @include('voyager::multilingual.input-hidden-bread-edit-add')
                             @php
                                 /* For 'multiple images' field - pass through the ID to identify the specific field */
                                 $dataTypeContent->id = $row->field;
@@ -82,14 +88,14 @@
                                 <div class="col-md-6 col-lg-5">
                                     <div class="form-group">
                                         <input
-                                                type="checkbox"
-                                                name="is_hidden"
-                                                id="is_hidden"
-                                                data-name="is_hidden"
-                                                class="toggleswitch"
-                                                value="1"
-                                                data-on="Yes" {{ $block->is_hidden ? 'checked="checked"' : '' }}
-                                                data-off="No"
+                                            type="checkbox"
+                                            name="is_hidden"
+                                            id="is_hidden"
+                                            data-name="is_hidden"
+                                            class="toggleswitch"
+                                            value="1"
+                                            data-on="Yes" {{ $block->is_hidden ? 'checked="checked"' : '' }}
+                                            data-off="No"
                                         />
                                         <label for="is_hidden"> &nbsp;Hide Block</label>
                                     </div> <!-- /.form-group -->
@@ -98,14 +104,14 @@
                                 <div class="col-md-6 col-lg-5">
                                     <div class="form-group">
                                         <input
-                                                type="checkbox"
-                                                name="is_delete_denied"
-                                                id="is_delete_denied"
-                                                data-name="is_delete_denied"
-                                                class="toggleswitch"
-                                                value="1"
-                                                data-on="Yes" {{ $block->is_delete_denied ? 'checked="checked"' : '' }}
-                                                data-off="No"
+                                            type="checkbox"
+                                            name="is_delete_denied"
+                                            id="is_delete_denied"
+                                            data-name="is_delete_denied"
+                                            class="toggleswitch"
+                                            value="1"
+                                            data-on="Yes" {{ $block->is_delete_denied ? 'checked="checked"' : '' }}
+                                            data-off="No"
                                         />
                                         <label for="is_delete_denied"> &nbsp;Prevent Deletion</label>
                                     </div> <!-- /.form-group -->
@@ -117,9 +123,9 @@
 
                 <span class="btn-group-lg">
                     <button
-                            style="float:left"
-                            type="submit"
-                            class="btn btn-success btn-lg save"
+                        style="float:left"
+                        type="submit"
+                        class="btn btn-success btn-lg save"
                     >{{ __('voyager::generic.save') }} This Block</button>
                 </span>
             </form>
@@ -131,10 +137,10 @@
 
                     <span class="btn-group-xs">
                         <button
-                                data-delete-block-btn
-                                type="submit"
-                                style="float:right; margin-top:22px"
-                                class="btn btn-danger btn-xs delete"
+                            data-delete-block-btn
+                            type="submit"
+                            style="float:right; margin-top:22px"
+                            class="btn btn-danger btn-xs delete"
                         >{{ __('voyager::generic.delete') }} This Block</button>
                     </span>
                 </form>

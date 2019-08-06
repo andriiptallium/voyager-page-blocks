@@ -99,6 +99,17 @@ class PageBlockController extends VoyagerBaseController
         $block->cache_ttl = $request->input('cache_ttl');
         $block->save();
 
+        $block->setTranslatableFields(['text']);
+
+
+        // Prepare Translations and Transform data
+        $translations = is_bread_translatable($block)
+            ? $block->prepareTranslations($request)
+            : [];
+
+        // Save translations if applied
+        $block->saveTranslations($translations);
+
         return redirect()
             ->to(URL::previous() . "#block-id-" . $id)
             ->with([
