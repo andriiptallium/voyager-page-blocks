@@ -33,6 +33,15 @@ class PageBlockController extends VoyagerBaseController
     {
         $page = Page::findOrFail($id);
 
+        $pageBlocks = $page->blocks->sortBy('order');
+
+
+        foreach ($pageBlocks as $block) {
+            foreach ($block->data as $field => $value) {
+                $block->$field = $value;
+            }
+        }
+
         return view('voyager::page-blocks.edit-add', [
             'page' => $page,
             'pageBlocks' => $page->blocks->sortBy('order'),
@@ -99,7 +108,17 @@ class PageBlockController extends VoyagerBaseController
         $block->cache_ttl = $request->input('cache_ttl');
         $block->save();
 
-        $block->setTranslatableFields(['text']);
+        $fields = get_object_vars($template->fields);
+
+        $translatable = [];
+
+        foreach ($fields as $key => $item) {
+            if ($item->translatable) {
+                $translatable[] = $key;
+            }
+        }
+
+        $block->setTranslatableFields($translatable);
 
 
         // Prepare Translations and Transform data

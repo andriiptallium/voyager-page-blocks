@@ -58,7 +58,7 @@
 @stop
 
 @php
-    $isModelTranslatable = is_bread_translatable($page)
+    $isModelTranslatable = is_bread_translatable($page);
 @endphp
 
 @section('page_title', 'Edit Page Content')
@@ -244,8 +244,56 @@
             });
 
             @if ($isModelTranslatable)
-                $('.side-body').multilingual({"editing": true});
+            $('.side-body').multilingual({"editing": true});
             @endif
         });
     </script>
+    <script>
+        $(document).ready(function () {
+            $("form").submit(function (e) {
+                document.getElementsByName('bullets')[0].value = bulletsEditor.getData();
+            });
+        });
+    </script>
+    <script src="/vendor/unisharp/laravel-ckeditor/ckeditor.js"></script>
+    <script>
+
+        let bulletsEditor = CKEDITOR.replace('bullets');
+        const trafficElem = document.getElementsByName('bullets')[0];
+
+        trafficElem.addEventListener('change', (e) => {
+            bulletsEditor.setData(e.target.value);
+        });
+
+        document.querySelectorAll('.language-selector label').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.getElementsByName('bullets')[0].value = bulletsEditor.getData();
+            });
+        });
+
+        var registered = [];
+        var setDetectChangeHandler = function(field) {
+            if (!registered.includes(field)) {
+                var superProps = Object.getPrototypeOf(field);
+                var superSet = Object.getOwnPropertyDescriptor(superProps, "value").set;
+                var superGet = Object.getOwnPropertyDescriptor(superProps, "value").get;
+                var newProps = {
+                    get: function() {
+                        return superGet.apply(this, arguments);
+                    },
+                    set: function (t) {
+                        var _this = this;
+                        setTimeout( function() { _this.dispatchEvent(new Event("change")); }, 50);
+                        return superSet.apply(this, arguments);
+                    }
+                };
+                Object.defineProperty(field, "value", newProps);
+                registered.push(field);
+            }
+        };
+
+        setDetectChangeHandler(trafficElem);
+
+    </script>
+
 @endsection
