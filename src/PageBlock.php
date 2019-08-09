@@ -1,54 +1,104 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: anton
- * Date: 28.03.19
- * Time: 19:07
- */
 
-namespace App\Modules\Page\Models;
+namespace Pvtl\VoyagerPageBlocks;
 
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
-use Pvtl\VoyagerPageBlocks\PageBlock;
-use App\Modules\Core\Helpers\Page\Templates;
-use Auth;
+use TCG\Voyager\Traits\Translatable;
 
-class Page extends Model
+class PageBlock extends Model
 {
-    protected $translatable = ['title', 'slug', 'body'];
+    use Translatable;
+
+    protected $translatable = [];
+
+    protected $touches = [
+        'page',
+    ];
 
     /**
-     * Statuses.
-     */
-    const STATUS_ACTIVE = 'ACTIVE';
-    const STATUS_INACTIVE = 'INACTIVE';
-
-    /**
-     * List of statuses.
+     * The attributes that should be mutated to dates.
      *
      * @var array
      */
-    public static $statuses = [self::STATUS_ACTIVE, self::STATUS_INACTIVE];
+    protected $dates = [
+        'created_at',
+        'updated_at',
+    ];
 
-    protected $guarded = [];
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+        'is_hidden' => 'boolean',
+        'is_minimized' => 'boolean',
+        'is_delete_denied' => 'boolean',
+    ];
 
-    public function save(array $options = [])
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'type',
+        'path',
+        'data',
+        'is_hidden',
+        'is_minimized',
+        'is_delete_denied',
+        'cache_ttl',
+    ];
+
+    public function cacheKey()
     {
-        // If no author has been assigned, assign the current user's id as the author of the post
-        if (!$this->author_id && Auth::user()) {
-            $this->author_id = Auth::user()->id;
+        return sprintf(
+            "%s/%s-%s",
+            $this->getTable(),
+            $this->getKey(),
+            $this->updated_at->timestamp
+        );
+    }
+
+    public function page()
+    {
+        return $this->belongsTo('TCG\Voyager\Models\Page');
+    }
+
+    // Fetch config for block template
+    public function template()
+    {
+        if ($this->type === 'include') {
+            return (object)[
+                'template' => $this->type,
+                'fields' => [],
+            ];
         }
 
-        parent::save();
+        $templateKey = $this->path;
+        $templateConfig = json_encode(Config::get("page-blocks.$templateKey"));
+
+        return json_decode($templateConfig);
     }
 
-    public function blocks()
+    public function getDataAttribute($value)
     {
-        return $this->hasMany(PageBlock::class);
+        return json_decode($value);
     }
 
-    public function getLayouts()
+    public function getCachedDataAttribute()
     {
-        return Templates::getTemplates('Page');;
+        return Cache::remember($this->cacheKey() . ':datum', $this->cache_ttl, function () {
+            return $this->data;
+        });
+    }
+
+    public function setTranslatableFields(array $fields = null)
+    {
+        $this->translatable = $fields;
     }
 }
