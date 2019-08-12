@@ -11,6 +11,7 @@ use Pvtl\VoyagerPageBlocks\Traits\Blocks;
 use Pvtl\VoyagerPageBlocks\Validators\BlockValidators;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController;
+use Storage;
 
 class PageBlockController extends VoyagerBaseController
 {
@@ -62,12 +63,28 @@ class PageBlockController extends VoyagerBaseController
         $template = $block->template();
         $dataType = Voyager::model('DataType')->where('slug', '=', 'page-blocks')->first();
 
+        $translatable = [];
+        $fields = get_object_vars($template->fields);
+
+        foreach ($fields as $key => $item) {
+            if ($item->translatable) {
+                $translatable[] = $key;
+            }
+        }
+
+        $block->setTranslatableFields($translatable);
+
+        // Prepare Translations and Transform data
+        $translations = is_bread_translatable($block)
+            ? $block->prepareTranslations($request)
+            : [];
+
         // Get all block data & validate
         $data = [];
 
         foreach ($template->fields as $row) {
             $existingData = $block->data;
-
+            unset($block->{$row->field});
             if (
                 $row->partial === 'voyager::formfields.image'
                 || $row->partial === 'voyager::formfields.multiple_images'
@@ -107,24 +124,6 @@ class PageBlockController extends VoyagerBaseController
         $block->is_delete_denied = $request->has('is_delete_denied');
         $block->cache_ttl = $request->input('cache_ttl');
         $block->save();
-
-        $fields = get_object_vars($template->fields);
-
-        $translatable = [];
-
-        foreach ($fields as $key => $item) {
-            if ($item->translatable) {
-                $translatable[] = $key;
-            }
-        }
-
-        $block->setTranslatableFields($translatable);
-
-
-        // Prepare Translations and Transform data
-        $translations = is_bread_translatable($block)
-            ? $block->prepareTranslations($request)
-            : [];
 
         // Save translations if applied
         $block->saveTranslations($translations);
@@ -250,5 +249,21 @@ class PageBlockController extends VoyagerBaseController
                 'message' => __('voyager::generic.successfully_deleted') . " {$dataType->display_name_singular}",
                 'alert-type' => 'success',
             ]);
+    }
+
+    public function deleteMultipleImage(Request $request)
+    {
+        $block = PageBlock::findOrFail($request['block_id']);
+        $data = $block->data;
+        $images = json_decode($block->data->{$request['field']}, true);
+        $key = array_search($request['file_name'], $images);
+        $file_to_delete = $images[$key];
+        unset($images[$key]);
+        $data->images = json_encode($images);
+        $block->data = $data;
+        if (Storage::disk(config('voyager.storage.disk'))->exists($file_to_delete)) {
+            Storage::disk(config('voyager.storage.disk'))->delete($file_to_delete);
+        }
+        $block->save();
     }
 }

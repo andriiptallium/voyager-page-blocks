@@ -11,4 +11,5 @@ Route::group([
 ], function () {
     Route::post('sort', ['uses' => "PageBlockController@sort", 'as' => 'sort']);
     Route::post('minimize', ['uses' => "PageBlockController@minimize", 'as' => 'minimize']);
+    Route::post('delete-multiple-image', ['uses' => "PageBlockController@deleteMultipleImage", 'as' => 'delete-multiple-image']);
 });

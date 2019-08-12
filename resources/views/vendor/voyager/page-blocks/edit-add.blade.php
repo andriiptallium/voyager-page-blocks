@@ -84,7 +84,7 @@
                     </div> <!-- /.panel-heading -->
 
                     <div class="panel-body">
-                        <form role="form" action="{{ route('voyager.page-blocks.store', $page->id) }}" method="POST"
+                        <form class="form-edit-add" role="form" action="{{ route('voyager.page-blocks.store', $page->id) }}" method="POST"
                               enctype="multipart/form-data">
                             {{ csrf_field() }}
 
@@ -139,6 +139,7 @@
                                 @include('voyager::page-blocks.partials.include')
                             @endif
                         @endforeach
+
                     </ol> <!-- /.dd-list -->
                 </div> <!-- /.dd -->
             </div> <!-- /.col -->
@@ -147,6 +148,18 @@
 @stop
 
 @section('javascript')
+    <script>
+        $(document).ready(function () {
+            $(".form-edit-add").submit(function (e) {
+                let elems = document.getElementsByName('bullets');
+                for (let i = 0; elems.length > i; i++) {
+                    let editor = elems[i].dataset.editorId;
+                    elems[i].value = window[editor].getData();
+                }
+            });
+        });
+    </script>
+    @parent
     <script>
         $('document').ready(function () {
             /**
@@ -173,17 +186,18 @@
             /**
              * MULTIPLE-IMAGES Delete function
              */
-            /*$(".remove-multi-image").on('click', function(e){
+            $(".remove-multi-image").on('click', function(e){
                 e.preventDefault();
                 var result = confirm("Are you sure you want to delete this image?");
                 if (result) {
-                    $.post('{{-- route('voyager.page-blocks.delete-multiple-image') --}}', {
-                        field: $(this).data('id'),
-                        file_name: $(this).data('file-name'),
+                    $.post('{{route('voyager.page-blocks.delete-multiple-image')}}', {
+                        block_id: $(this.closest('.dd-item')).data('id'),
+                        field: $(this.nextElementSibling).data('id'),
+                        file_name: $(this.nextElementSibling).data('file-name'),
                         _token: '{{ csrf_token() }}'
                     });
                 }
-            });*/
+            });
 
             /**
              * Confirm DELETE block
@@ -248,29 +262,8 @@
             @endif
         });
     </script>
-    <script>
-        $(document).ready(function () {
-            $("form").submit(function (e) {
-                document.getElementsByName('bullets')[0].value = bulletsEditor.getData();
-            });
-        });
-    </script>
     <script src="/vendor/unisharp/laravel-ckeditor/ckeditor.js"></script>
     <script>
-
-        let bulletsEditor = CKEDITOR.replace('bullets');
-        const trafficElem = document.getElementsByName('bullets')[0];
-
-        trafficElem.addEventListener('change', (e) => {
-            bulletsEditor.setData(e.target.value);
-        });
-
-        document.querySelectorAll('.language-selector label').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                document.getElementsByName('bullets')[0].value = bulletsEditor.getData();
-            });
-        });
-
         var registered = [];
         var setDetectChangeHandler = function(field) {
             if (!registered.includes(field)) {
@@ -292,8 +285,28 @@
             }
         };
 
-        setDetectChangeHandler(trafficElem);
+        let elems = document.getElementsByName('bullets');
 
+        for (let i = 0; elems.length > i; i++) {
+            elems[i].dataset.editorId = 'bulletsEditor-'+i;
+            window['bulletsEditor-'+i] = CKEDITOR.replace(elems[i]);
+
+            elems[i].addEventListener('change', (e) => {
+                let editor = e.target.dataset.editorId;
+                window[editor].setData(e.target.value);
+            });
+            setDetectChangeHandler(elems[i]);
+        }
+
+        document.querySelectorAll('.language-selector label').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                let elems = document.getElementsByName('bullets');
+                for (let i = 0; elems.length > i; i++) {
+                    let editor = elems[i].dataset.editorId;
+                    elems[i].value = window[editor].getData();
+                }
+            });
+        });
     </script>
 
 @endsection

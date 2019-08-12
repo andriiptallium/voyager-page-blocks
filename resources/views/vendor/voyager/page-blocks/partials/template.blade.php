@@ -24,17 +24,17 @@
                   enctype="multipart/form-data">
                 {{ method_field("PUT") }}
                 {{ csrf_field() }}
-
                 <div class="row">
                     @foreach($template->fields as $row)
+
                         @if ($row->partial === 'break')</div> <!-- /.row --><div class="row"> @continue @endif
 
                     @php $options = $row; @endphp
 
                     @php
-                        $dataTypeContent = $block;
-                        $dataTypeContent->setTranslatableFields(array_keys(get_object_vars($template->fields)));
-
+                        $ddataTypeContent = $dataTypeContent;
+                            $dataTypeContent = $block;
+                            $dataTypeContent->setTranslatableFields(array_keys(get_object_vars($template->fields)));
                     @endphp
 
                     <div class="@if (strpos($row->partial, 'rich_text_box') !== false)col-md-12 @else col-md-6 @endif">
@@ -43,6 +43,7 @@
                             @include('voyager::multilingual.input-hidden-bread-edit-add')
                             @php
                                 /* For 'multiple images' field - pass through the ID to identify the specific field */
+                                $dataTypeContent = $ddataTypeContent;
                                 $dataTypeContent->id = $row->field;
                             @endphp
                             @include($row->partial)
