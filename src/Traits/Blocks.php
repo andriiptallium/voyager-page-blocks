@@ -93,7 +93,10 @@ trait Blocks
                 }
 
                 if (isset($existingData->$key)) {
-                    $multiImages = array_merge($multiImages, json_decode($existingData->$key, true));
+                    $existingImages = json_decode($existingData->$key, true);
+                    if (is_array($existingImages)) {
+                        $multiImages = array_merge($multiImages, $existingImages);
+                    }
                 }
 
                 $data[$key] = json_encode($multiImages);
