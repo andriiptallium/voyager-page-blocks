@@ -82,7 +82,7 @@ trait Blocks
         return $block;
     }
 
-    public function uploadImages(Request $request, array $data): array
+    public function uploadImages(Request $request, array $data, $existingData): array
     {
         foreach ($request->files as $key => $field) {
             if (is_array($request->file($key))) {
@@ -91,6 +91,11 @@ trait Blocks
                     $filePath = $file->store('public/blocks');
                     $multiImages[] = str_replace('public/', '', $filePath);
                 }
+
+                if (isset($existingData->$key)) {
+                    $multiImages = array_merge($multiImages, json_decode($existingData->$key, true));
+                }
+
                 $data[$key] = json_encode($multiImages);
             } else {
                 $filePath = $request->file($key)->store('public/blocks');

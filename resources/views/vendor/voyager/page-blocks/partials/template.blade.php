@@ -33,8 +33,14 @@
 
                     @php
                         $ddataTypeContent = $dataTypeContent;
-                            $dataTypeContent = $block;
-                            $dataTypeContent->setTranslatableFields(array_keys(get_object_vars($template->fields)));
+                        $dataTypeContent = $block;
+                        $translateble_fields = [];
+
+                        foreach($template->fields as $field) {
+                            if($field->translatable) $translateble_fields[] = $field->field;
+                        }
+
+                        $dataTypeContent->setTranslatableFields($translateble_fields);
                     @endphp
 
                     <div class="@if (strpos($row->partial, 'rich_text_box') !== false)col-md-12 @else col-md-6 @endif">

@@ -116,7 +116,7 @@ class PageBlockController extends VoyagerBaseController
                 ]);
         }
 
-        $data = $this->uploadImages($request, $data);
+        $data = $this->uploadImages($request, $data, $existingData);
 
         $block->data = $data;
         $block->path = $block->type === 'include' ? $request->input('path') : $block->path;

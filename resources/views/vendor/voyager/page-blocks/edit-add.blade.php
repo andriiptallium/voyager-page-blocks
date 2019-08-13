@@ -195,7 +195,9 @@
                         field: $(this.nextElementSibling).data('id'),
                         file_name: $(this.nextElementSibling).data('file-name'),
                         _token: '{{ csrf_token() }}'
-                    });
+                    }).done(function() {
+                        location.reload();
+                    })
                 }
             });
 
