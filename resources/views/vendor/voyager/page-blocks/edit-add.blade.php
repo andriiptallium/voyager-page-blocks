@@ -149,17 +149,64 @@
 
 @section('javascript')
     <script>
+        var editorElems = document.getElementsByTagName('textarea');
+
         $(document).ready(function () {
             $(".form-edit-add").submit(function (e) {
-                let elems = document.getElementsByName('bullets');
-                for (let i = 0; elems.length > i; i++) {
-                    let editor = elems[i].dataset.editorId;
-                    elems[i].value = window[editor].getData();
+                for (let i = 0; editorElems.length > i; i++) {
+                    let editor = editorElems[i].dataset.editorId;
+                    editorElems[i].value = window[editor].getData();
                 }
             });
         });
     </script>
+
     @parent
+
+    <script src="/vendor/unisharp/laravel-ckeditor/ckeditor.js"></script>
+    <script>
+        var registered = [];
+        var setDetectChangeHandler = function(field) {
+            if (!registered.includes(field)) {
+                var superProps = Object.getPrototypeOf(field);
+                var superSet = Object.getOwnPropertyDescriptor(superProps, "value").set;
+                var superGet = Object.getOwnPropertyDescriptor(superProps, "value").get;
+                var newProps = {
+                    get: function() {
+                        return superGet.apply(this, arguments);
+                    },
+                    set: function (t) {
+                        var _this = this;
+                        setTimeout( function() { _this.dispatchEvent(new Event("change")); }, 50);
+                        return superSet.apply(this, arguments);
+                    }
+                };
+                Object.defineProperty(field, "value", newProps);
+                registered.push(field);
+            }
+        };
+
+        for (let i = 0; editorElems.length > i; i++) {
+            editorElems[i].dataset.editorId = 'bulletsEditor-'+i;
+            window['bulletsEditor-'+i] = CKEDITOR.replace(editorElems[i]);
+
+            editorElems[i].addEventListener('change', (e) => {
+                let editor = e.target.dataset.editorId;
+                window[editor].setData(e.target.value);
+            });
+            setDetectChangeHandler(editorElems[i]);
+        }
+
+        document.querySelectorAll('.language-selector label').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                for (let i = 0; editorElems.length > i; i++) {
+                    let editor = editorElems[i].dataset.editorId;
+                    editorElems[i].value = window[editor].getData();
+                }
+            });
+        });
+    </script>
+
     <script>
         $('document').ready(function () {
             /**
@@ -262,52 +309,6 @@
             @if ($isModelTranslatable)
             $('.side-body').multilingual({"editing": true});
             @endif
-        });
-    </script>
-    <script src="/vendor/unisharp/laravel-ckeditor/ckeditor.js"></script>
-    <script>
-        var registered = [];
-        var setDetectChangeHandler = function(field) {
-            if (!registered.includes(field)) {
-                var superProps = Object.getPrototypeOf(field);
-                var superSet = Object.getOwnPropertyDescriptor(superProps, "value").set;
-                var superGet = Object.getOwnPropertyDescriptor(superProps, "value").get;
-                var newProps = {
-                    get: function() {
-                        return superGet.apply(this, arguments);
-                    },
-                    set: function (t) {
-                        var _this = this;
-                        setTimeout( function() { _this.dispatchEvent(new Event("change")); }, 50);
-                        return superSet.apply(this, arguments);
-                    }
-                };
-                Object.defineProperty(field, "value", newProps);
-                registered.push(field);
-            }
-        };
-
-        let elems = document.getElementsByName('bullets');
-
-        for (let i = 0; elems.length > i; i++) {
-            elems[i].dataset.editorId = 'bulletsEditor-'+i;
-            window['bulletsEditor-'+i] = CKEDITOR.replace(elems[i]);
-
-            elems[i].addEventListener('change', (e) => {
-                let editor = e.target.dataset.editorId;
-                window[editor].setData(e.target.value);
-            });
-            setDetectChangeHandler(elems[i]);
-        }
-
-        document.querySelectorAll('.language-selector label').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                let elems = document.getElementsByName('bullets');
-                for (let i = 0; elems.length > i; i++) {
-                    let editor = elems[i].dataset.editorId;
-                    elems[i].value = window[editor].getData();
-                }
-            });
         });
     </script>
 

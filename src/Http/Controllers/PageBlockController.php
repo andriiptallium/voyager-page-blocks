@@ -259,7 +259,7 @@ class PageBlockController extends VoyagerBaseController
         $key = array_search($request['file_name'], $images);
         $file_to_delete = $images[$key];
         unset($images[$key]);
-        $data->images = json_encode($images);
+        $data->{$request['field']} = json_encode($images);
         $block->data = $data;
         if (Storage::disk(config('voyager.storage.disk'))->exists($file_to_delete)) {
             Storage::disk(config('voyager.storage.disk'))->delete($file_to_delete);
